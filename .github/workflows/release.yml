@@ -1,0 +1,38 @@
+# Push a tag like v0.2.2 and this builds GW2WvWPresence.dll and publishes it as a GitHub release,
+# which Nexus then installs for everyone on their next game start.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches the addon version
+        run: |
+          v=$(grep -oP 'Def\.Version\.(Major|Minor|Build) = \K[0-9]+' src/presence.cpp | paste -sd.)
+          echo "Addon version $v, tag ${GITHUB_REF_NAME}"
+          [ "v$v" = "${GITHUB_REF_NAME}" ] || { echo "Tag and Def.Version don't match"; exit 1; }
+
+      - name: Build
+        run: |
+          pip install ziglang==0.17.1
+          ./build.sh
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes="release-notes/${GITHUB_REF_NAME}.md"
+          if [ -f "$notes" ]; then
+            gh release create "$GITHUB_REF_NAME" build/GW2WvWPresence.dll --title "$GITHUB_REF_NAME" --notes-file "$notes"
+          else
+            gh release create "$GITHUB_REF_NAME" build/GW2WvWPresence.dll --title "$GITHUB_REF_NAME" --generate-notes
+          fi

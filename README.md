@@ -84,7 +84,7 @@ pip install ziglang
 ./build.sh            # writes build/GW2WvWPresence.dll
 ```
 
-Zig is used as a cross-compiler, so this works on Linux, macOS or Windows. To publish an update, raise `Def.Version` in `src/presence.cpp`, then create a GitHub release whose tag matches it (for example `v0.2.2`) with the DLL attached. Nexus picks it up on the next game start.
+Zig is used as a cross-compiler, so this works on Linux, macOS or Windows. To publish an update, raise `Def.Version` in `src/presence.cpp`, add notes in `release-notes/vX.Y.Z.md`, and push a matching tag (for example `v0.2.2`). The Release workflow builds the DLL and publishes it, and Nexus picks it up on the next game start.
 
 ## Credits
 
